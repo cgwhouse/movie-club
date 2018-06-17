@@ -15,24 +15,50 @@ conn = connect('movie_club.db')
 c = conn.cursor()
 
 
-def member_list():
-    c.execute('SELECT name FROM Members;')
-    names = c.fetchall()
-    actual = []
-    for name in names:
-        actual.append(name[0])
-    return actual
+def main():
+    with open('greeting_string.txt') as file:
+        greeting = file.read()
+    print('\n\n\n\n\n' + greeting)
+    present_actions()
 
 
-def create_queue(name):
-    result = '\n\n' + name + "'s Queue:\n" + '-----------------------------\n'
-    c.execute('SELECT member_ID FROM Members WHERE name = ?;', (name,))
-    member_id = c.fetchone()[0]
-    c.execute(queue_sel, (member_id,))
-    movies = c.fetchall()
-    for movie in movies:
-        result += movie[0] + '\n'
-    return result.rstrip()
+def present_actions():
+    actions = ['View Movie Queues', 'Add to a Queue', 'Delete from a Queue',
+               'Add Movie to Watched List', 'View Watched List',
+               'Delete from Watched List', 'View Club Members',
+               'Exit the Program']
+    menu = '\n\nSelect an Action:\n-----------------\n'
+    number_of_actions = 8
+    for i in range(number_of_actions):
+        menu += str(i+1) + ' - ' + actions[i] + '\n\n'
+    menu += '\nAction:'
+    print(menu)
+    try:
+        action = int(input())
+        if action not in range(1, number_of_actions+1):
+            raise ValueError
+        if action == 8:
+            print('Goodbye!')
+            conn.commit()
+            conn.close()
+            return
+        elif action == 1:
+            view_movie_queues()
+        elif action == 2:
+            add_to_queue()
+        elif action == 3:
+            delete_from_queue()
+        elif action == 4:
+            add_to_watched()
+        elif action == 5:
+            view_watched()
+        elif action == 6:
+            delete_from_watched()
+        elif action == 7:
+            view_club_members()
+    except ValueError:
+        print('\n\nInvalid Action. Try Again.\n\n')
+        present_actions()
 
 
 def view_movie_queues():
@@ -176,50 +202,25 @@ def view_club_members():
     present_actions()
 
 
-def present_actions():
-    actions = ['View Movie Queues', 'Add to a Queue', 'Delete from a Queue',
-               'Add Movie to Watched List', 'View Watched List',
-               'Delete from Watched List', 'View Club Members',
-               'Exit the Program']
-    menu = '\n\nSelect an Action:\n-----------------\n'
-    number_of_actions = 8
-    for i in range(number_of_actions):
-        menu += str(i+1) + ' - ' + actions[i] + '\n\n'
-    menu += '\nAction:'
-    print(menu)
-    try:
-        action = int(input())
-        if action not in range(1, number_of_actions+1):
-            raise ValueError
-        if action == 8:
-            print('Goodbye!')
-            conn.commit()
-            conn.close()
-            return
-        elif action == 1:
-            view_movie_queues()
-        elif action == 2:
-            add_to_queue()
-        elif action == 3:
-            delete_from_queue()
-        elif action == 4:
-            add_to_watched()
-        elif action == 5:
-            view_watched()
-        elif action == 6:
-            delete_from_watched()
-        elif action == 7:
-            view_club_members()
-    except ValueError:
-        print('\n\nInvalid Action. Try Again.\n\n')
-        present_actions()
+# Helpers
+def member_list():
+    c.execute('SELECT name FROM Members;')
+    names = c.fetchall()
+    actual = []
+    for name in names:
+        actual.append(name[0])
+    return actual
 
 
-def main():
-    with open('greeting_string.txt') as file:
-        greeting = file.read()
-    print('\n\n\n\n\n' + greeting)
-    present_actions()
+def create_queue(name):
+    result = '\n\n' + name + "'s Queue:\n" + '-----------------------------\n'
+    c.execute('SELECT member_ID FROM Members WHERE name = ?;', (name,))
+    member_id = c.fetchone()[0]
+    c.execute(queue_sel, (member_id,))
+    movies = c.fetchall()
+    for movie in movies:
+        result += movie[0] + '\n'
+    return result.rstrip()
 
 
 main()
