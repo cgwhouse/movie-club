@@ -9,7 +9,7 @@ queue_ins = 'INSERT INTO Movies VALUES (NULL, ?, ?, 0);'
 queue_del = 'DELETE FROM Movies WHERE title = ?;'
 queue_watch = 'UPDATE Movies SET watched = 1 WHERE title = ?;'
 watched_list = 'SELECT title, name FROM Movies INNER JOIN Members ON picker_ID \
-                = member_ID;'
+                = member_ID WHERE watched = 1;'
 club_members = 'SELECT name FROM Members;'
 conn = connect('movie_club.db')
 c = conn.cursor()
