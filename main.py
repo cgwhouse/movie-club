@@ -26,9 +26,9 @@ def present_actions():
     actions = ['View Movie Queues', 'Add to a Queue', 'Delete from a Queue',
                'Add Movie to Watched List', 'View Watched List',
                'Delete from Watched List', 'View Club Members',
-               'Exit the Program']
+               'Whose Turn Is It?', 'Exit the Program']
     menu = '\n\nSelect an Action:\n-----------------\n'
-    number_of_actions = 8
+    number_of_actions = 9
     for i in range(number_of_actions):
         menu += str(i+1) + ' - ' + actions[i] + '\n\n'
     menu += '\nAction:'
@@ -37,7 +37,7 @@ def present_actions():
         action = int(input())
         if action not in range(1, number_of_actions+1):
             raise ValueError
-        if action == 8:
+        if action == 9:
             print('Goodbye!')
             conn.commit()
             conn.close()
@@ -56,6 +56,8 @@ def present_actions():
             delete_from_watched()
         elif action == 7:
             view_club_members()
+        elif action == 8:
+            show_club_status()
     except ValueError:
         print('\n\nInvalid Action. Try Again.\n\n')
         present_actions()
@@ -148,6 +150,7 @@ def add_to_watched():
             print(movie_prompt)
             movie = input()
         for movie in movies_to_update:
+            # update_the_picker()
             c.execute('SELECT movie_ID FROM Movies WHERE title = ?;', (movie,))
             test = c.fetchone()
             if test is None:
@@ -221,6 +224,20 @@ def create_queue(name):
     for movie in movies:
         result += movie[0] + '\n'
     return result.rstrip()
+
+
+def show_club_status():
+    c.execute('SELECT * FROM ProgramInfo;')
+    member_ID = c.fetchone()[0]
+    c.execute('SELECT name FROM Members WHERE member_ID = ?;', (member_ID,))
+    current_picker = c.fetchone()[0]
+    result = '\n\nThe person selecting the next movie is ' + current_picker
+    result += '.\n\nWould you like to override this?'
+    print(result)
+    answer = input('y/n: ')
+    if answer == 'y':
+        print('\nwe will try soon.')
+    present_actions()
 
 
 main()
