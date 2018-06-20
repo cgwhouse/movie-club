@@ -26,9 +26,9 @@ def present_actions():
     actions = ['View Movie Queues', 'Add to a Queue', 'Delete from a Queue',
                'Add Movie to Watched List', 'View Watched List',
                'Delete from Watched List', 'View Club Members',
-               'Whose Turn Is It?', 'Exit the Program']
+               'Whose Turn Is It?', 'TEST', 'Exit the Program']
     menu = '\n\nSelect an Action:\n-----------------\n'
-    number_of_actions = 9
+    number_of_actions = 10
     for i in range(number_of_actions):
         menu += str(i+1) + ' - ' + actions[i] + '\n\n'
     menu += '\nAction:'
@@ -37,7 +37,7 @@ def present_actions():
         action = int(input())
         if action not in range(1, number_of_actions+1):
             raise ValueError
-        if action == 9:
+        if action == 10:
             print('Goodbye!')
             conn.commit()
             conn.close()
@@ -58,6 +58,8 @@ def present_actions():
             view_club_members()
         elif action == 8:
             show_club_status()
+        elif action == 9:
+            update_the_picker()
     except ValueError:
         print('\n\nInvalid Action. Try Again.\n\n')
         present_actions()
@@ -150,7 +152,7 @@ def add_to_watched():
             print(movie_prompt)
             movie = input()
         for movie in movies_to_update:
-            # update_the_picker()
+            update_the_picker()
             c.execute('SELECT movie_ID FROM Movies WHERE title = ?;', (movie,))
             test = c.fetchone()
             if test is None:
@@ -238,6 +240,18 @@ def show_club_status():
     if answer == 'y':
         print('\nwe will try soon.')
     present_actions()
+
+
+def update_the_picker():
+    c.execute('SELECT count(*) FROM Members;')
+    m_count = c.fetchone()[0]
+    c.execute('SELECT current_selector FROM ProgramInfo;')
+    curr_id = c.fetchone()[0]
+    if curr_id + 1 > m_count:
+        c.execute('UPDATE ProgramInfo SET current_selector = ?;', (1,))
+    else:
+        c.execute('UPDATE ProgramInfo SET current_selector = ?;', (curr_id + 1,))
+    conn.commit()
 
 
 main()
