@@ -55,49 +55,48 @@ def add_to_queue():
     present_actions()
 
 
-def delete_from_queue():
-    movies_to_delete = []
-    movie_prompt = '\n\nEnter the name of a movie to delete (press enter to ex\
-                    it):'
+def edit_list(movie_prompt, error_string, sql_query, success_msg):
+    movies = []
     print(movie_prompt)
     movie = input()
     while movie != '':
-        movies_to_delete.append(movie)
+        movies.append(movie)
         print(movie_prompt)
         movie = input()
-    for movie in movies_to_delete:
+    for movie in movies:
         c.execute('SELECT movie_ID FROM Movies WHERE title = ?;', (movie,))
         test = c.fetchone()
         if test is None:
-            print('Error:', movie, 'is not a title in the queue.')
+            print('Error:', movie, 'is not a title', error_string)
         else:
-            c.execute(queue_del, (movie,))
-    print('\nMovies have been deleted successfully.')
+            c.execute(sql_query, (movie,))
+    print('\nMovies have been ' + success_msg + ' successfully.')
     conn.commit()
     present_actions()
 
 
+def delete_from_queue():
+    movie_prompt = '\nEnter the name of a movie to delete (press enter to ex'
+    movie_prompt += 'it):'
+    error_string = 'in the queue.'
+    success_msg = 'deleted'
+    edit_list(movie_prompt, error_string, queue_del, success_msg)
+
+
 def add_to_watched():
-        movies_to_update = []
-        movie_prompt = '\nEnter the name of a movie you watched (press enter t\
-                        o exit):'
-        print(movie_prompt)
-        movie = input()
-        while movie != '':
-            movies_to_update.append(movie)
-            print(movie_prompt)
-            movie = input()
-        for movie in movies_to_update:
-            c.execute('SELECT movie_ID FROM Movies WHERE title = ?;', (movie,))
-            test = c.fetchone()
-            if test is None:
-                print('Error:', movie, 'is not a title in the queue.')
-            else:
-                c.execute(queue_watch, (movie,))
-                update_the_picker()
-        print('\nMovies have been added to "watched" list successfully.')
-        conn.commit()
-        present_actions()
+    movie_prompt = '\nEnter the name of a movie you watched (press enter t'
+    movie_prompt += 'o exit):'
+    error_string = 'in the queue.'
+    success_msg = 'added to "watched" list'
+    edit_list(movie_prompt, error_string, queue_watch, success_msg)
+
+
+def delete_from_watched():
+    movie_prompt = '\nEnter the name of a movie to delete (press enter to exit'
+    movie_prompt += '):'
+    error_string = 'on the list.'
+    success_msg = 'deleted'
+    edit_list(movie_prompt, error_string, queue_del, success_msg)
 
 
 def view_watched():
@@ -108,28 +107,6 @@ def view_watched():
     for movie in watched:
         result += movie[0] + ' added by ' + movie[1] + '\n'
     print(result.rstrip())
-    present_actions()
-
-
-def delete_from_watched():
-    movies_to_delete = []
-    movie_prompt = '\nEnter the name of a movie to delete (press enter to exit\
-                    ):'
-    print(movie_prompt)
-    movie = input()
-    while movie != '':
-        movies_to_delete.append(movie)
-        print(movie_prompt)
-        movie = input()
-    for movie in movies_to_delete:
-        c.execute('SELECT movie_ID FROM Movies WHERE title = ?;', (movie,))
-        test = c.fetchone()
-        if test is None:
-            print('Error:', movie, 'is not a title on the list.')
-        else:
-            c.execute(queue_del, (movie,))
-    print('\nMovies have been deleted successfully.')
-    conn.commit()
     present_actions()
 
 
