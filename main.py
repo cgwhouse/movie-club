@@ -3,7 +3,6 @@
 #
 from sqlite3 import connect
 
-# Globals
 queue_sel = 'SELECT title FROM Movies WHERE picker_ID = ? AND watched = 0;'
 queue_ins = 'INSERT INTO Movies VALUES (NULL, ?, ?, 0);'
 queue_del = 'DELETE FROM Movies WHERE title = ?;'
@@ -145,7 +144,6 @@ def view_club_members():
     present_actions()
 
 
-# Helpers
 def member_list():
     c.execute('SELECT name FROM Members;')
     names = c.fetchall()
@@ -217,12 +215,11 @@ def present_actions():
     menu = '\n\nSelect an Action:\n-----------------\n'
     n = 1
     for action in actions:
-        menu += str(n) + ' - ' + action + '\n\n'
+        menu += str(n) + ' - ' + action + '\n\n\n'
         n += 1
-    menu += '\nAction:'
     print(menu)
     try:
-        action = int(input())
+        action = int(input('Action: '))
         if action not in range(1, n):
             raise ValueError
         get_action(action)
