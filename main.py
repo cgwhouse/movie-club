@@ -88,13 +88,13 @@ def add_to_watched():
             print(movie_prompt)
             movie = input()
         for movie in movies_to_update:
-            update_the_picker()
             c.execute('SELECT movie_ID FROM Movies WHERE title = ?;', (movie,))
             test = c.fetchone()
             if test is None:
                 print('Error:', movie, 'is not a title in the queue.')
             else:
                 c.execute(queue_watch, (movie,))
+                update_the_picker()
         print('\nMovies have been added to "watched" list successfully.')
         conn.commit()
         present_actions()
@@ -174,8 +174,29 @@ def show_club_status():
     print(result)
     answer = input('y/n: ')
     if answer == 'y':
-        print('\nwe will try soon.')
+        manual_update_the_picker()
     present_actions()
+
+
+def manual_update_the_picker():
+    names = member_list()
+    result = '\n\nWho do you want to be the new movie selector? Options are: '
+    for i in range(len(names)):
+        result += names[i]
+        if i != len(names) - 1:
+            result += ', '
+    result += '\n'
+    print(result)
+    new_selector = input('Name: ')
+    while new_selector not in names:
+        error = '\n' + new_selector + ' is not a member of the club.'
+        print(error)
+        print(result)
+        new_selector = input('Name: ')
+    c.execute('SELECT member_ID FROM Members WHERE name = ?;', (new_selector,))
+    member_ID = c.fetchone()[0]
+    c.execute('UPDATE ProgramInfo SET current_selector = ?;', (member_ID,))
+    print('\nThe current selector has been updated successfully.')
 
 
 def update_the_picker():
