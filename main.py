@@ -55,7 +55,8 @@ def add_to_queue():
     present_actions()
 
 
-def edit_list(movie_prompt, error_string, sql_query, success_msg):
+def edit_list(movie_prompt, error_string, sql_query, success_msg,
+              update_picker=False):
     movies = []
     print(movie_prompt)
     movie = input()
@@ -70,6 +71,8 @@ def edit_list(movie_prompt, error_string, sql_query, success_msg):
             print('Error:', movie, 'is not a title', error_string)
         else:
             c.execute(sql_query, (movie,))
+            if update_picker:
+                update_the_picker()
     print('\nMovies have been ' + success_msg + ' successfully.')
     conn.commit()
     present_actions()
@@ -88,7 +91,7 @@ def add_to_watched():
     movie_prompt += 'o exit):'
     error_string = 'in the queue.'
     success_msg = 'added to "watched" list'
-    edit_list(movie_prompt, error_string, queue_watch, success_msg)
+    edit_list(movie_prompt, error_string, queue_watch, success_msg, True)
 
 
 def delete_from_watched():
