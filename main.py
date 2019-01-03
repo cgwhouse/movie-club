@@ -2,6 +2,7 @@
 # Cristian Widenhouse
 #
 from sqlite3 import connect
+from termcolor import colored
 
 queue_sel = 'SELECT title FROM Movies WHERE picker_ID = ? AND watched = 0;'
 queue_ins = 'INSERT INTO Movies VALUES (NULL, ?, ?, 0);'
@@ -232,7 +233,7 @@ def present_actions():
 def main():
     with open('greeting_string.txt') as file:
         greeting = file.read()
-    print('\n\n\n\n\n' + greeting)
+    print('\n\n\n\n\n' + colored(greeting, 'green'))
     present_actions()
 
 
