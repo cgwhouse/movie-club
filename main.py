@@ -35,7 +35,7 @@ def add_to_queue():
     print(queue_prompt)
     selection = input()
     while selection not in names:
-        print('\nInvalid queue selection.')
+        print(colored('\nInvalid queue selection.', 'red'))
         print(queue_prompt)
         selection = input()
     print('\nGreat! We will use ' + selection + "'s queue to add movies.")
@@ -51,7 +51,7 @@ def add_to_queue():
         movie = input()
     for movie in movies_to_add:
         c.execute(queue_ins, (movie, member_ID))
-    print('\nMovies have been added successfully.')
+    print(colored('\nMovies have been added successfully.', 'green'))
     conn.commit()
     present_actions()
 
@@ -69,35 +69,34 @@ def edit_list(movie_prompt, error_string, sql_query, success_msg,
         c.execute('SELECT movie_ID FROM Movies WHERE title = ?;', (movie,))
         test = c.fetchone()
         if test is None:
-            print('Error:', movie, 'is not a title', error_string)
+            print(colored('Error: ' + movie +
+                          ' is not a title ' + error_string, 'red'))
         else:
             c.execute(sql_query, (movie,))
             if update_picker:
                 update_the_picker()
-    print('\nMovies have been ' + success_msg + ' successfully.')
+    print(colored('\nMovies have been ' + success_msg +
+                  ' successfully (bad inputs were ignored).', 'green'))
     conn.commit()
     present_actions()
 
 
 def delete_from_queue():
-    movie_prompt = '\nEnter the name of a movie to delete (press enter to ex'
-    movie_prompt += 'it):'
+    movie_prompt = '\nEnter the name of a movie to delete (press enter to exit):'
     error_string = 'in the queue.'
     success_msg = 'deleted'
     edit_list(movie_prompt, error_string, queue_del, success_msg)
 
 
 def add_to_watched():
-    movie_prompt = '\nEnter the name of a movie you watched (press enter t'
-    movie_prompt += 'o exit):'
+    movie_prompt = '\nEnter the name of a movie you watched (press enter to exit):'
     error_string = 'in the queue.'
     success_msg = 'added to "watched" list'
     edit_list(movie_prompt, error_string, queue_watch, success_msg, True)
 
 
 def delete_from_watched():
-    movie_prompt = '\nEnter the name of a movie to delete (press enter to exit'
-    movie_prompt += '):'
+    movie_prompt = '\nEnter the name of a movie to delete (press enter to exit):'
     error_string = 'on the list.'
     success_msg = 'deleted'
     edit_list(movie_prompt, error_string, queue_del, success_msg)
@@ -171,13 +170,13 @@ def manual_update_the_picker():
     new_selector = input('Name: ')
     while new_selector not in names:
         error = '\n' + new_selector + ' is not a member of the club.'
-        print(error)
+        print(colored(error, 'red'))
         print(result)
         new_selector = input('Name: ')
     c.execute('SELECT member_ID FROM Members WHERE name = ?;', (new_selector,))
     member_ID = c.fetchone()[0]
     c.execute('UPDATE ProgramInfo SET current_selector = ?;', (member_ID,))
-    print('\nThe current selector has been updated successfully.')
+    print(colored('\nThe current selector has been updated successfully.', 'green'))
 
 
 def update_the_picker():
@@ -226,14 +225,14 @@ def present_actions():
             raise ValueError
         get_action(action)
     except ValueError:
-        print('\n\nInvalid Action. Try Again.\n\n')
+        print(colored('\n\nInvalid Action. Try Again.\n\n', 'red'))
         present_actions()
 
 
 def main():
     with open('greeting_string.txt') as file:
         greeting = file.read()
-    print('\n\n\n\n\n' + colored(greeting, 'green'))
+    print('\n\n\n\n\n' + colored(greeting, 'cyan'))
     present_actions()
 
 
