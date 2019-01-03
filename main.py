@@ -200,7 +200,7 @@ def goodbye():
 
 
 action_dict = {1: view_movie_queues, 2: add_to_queue, 3: delete_from_queue,
-               4: add_to_watched, 5: view_watched, 6: delete_from_watched,
+               4: view_watched, 5: add_to_watched, 6: delete_from_watched,
                7: view_club_members, 8: show_club_status,
                9: goodbye}
 
@@ -211,7 +211,7 @@ def get_action(name):
 
 def present_actions():
     actions = ['View Movie Queues', 'Add to a Queue', 'Delete from a Queue',
-               'Add Movie to Watched List', 'View Watched List',
+               'View Watched List', 'Add Movie to Watched List',
                'Delete from Watched List', 'View Club Members',
                'Whose Turn Is It?', 'Exit the Program']
     menu = '\n\nSelect an Action:\n-----------------\n'
