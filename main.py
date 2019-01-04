@@ -27,7 +27,7 @@ def view_movie_queues():
 
 def add_to_queue():
     names = member_list()
-    queue_prompt = '\n\nWhich queue do you want to add to? Options are: '
+    queue_prompt = '\nWhich queue do you want to add to? Options are: '
     for i in range(len(names)):
         queue_prompt += names[i]
         if i != len(names) - 1:
@@ -38,7 +38,7 @@ def add_to_queue():
         print(colored('\nInvalid queue selection.', 'red'))
         print(queue_prompt)
         selection = input()
-    print('\nGreat! We will use ' + selection + "'s queue to add movies.")
+    print(f"\nGreat! We will use {selection}'s queue to add movies.")
     c.execute(member_ID_from_name, (selection,))
     member_ID = c.fetchone()[0]
     movies_to_add = []
@@ -69,14 +69,14 @@ def edit_list(movie_prompt, error_string, sql_query, success_msg,
         c.execute('SELECT movie_ID FROM Movies WHERE title = ?;', (movie,))
         test = c.fetchone()
         if test is None:
-            print(colored('Error: ' + movie +
-                          ' is not a title ' + error_string, 'red'))
+            print(
+                colored(f'Error: {movie} is not a title {error_string}', 'red'))
         else:
             c.execute(sql_query, (movie,))
             if update_picker:
                 update_the_picker()
-    print(colored('\nMovies have been ' + success_msg +
-                  ' successfully (bad inputs were ignored).', 'green'))
+    print(colored(
+        f'\nMovies have been {success_msg} successfully (bad inputs were ignored).', 'green'))
     conn.commit()
     present_actions()
 
@@ -105,10 +105,9 @@ def delete_from_watched():
 def view_watched():
     c.execute(watched_list)
     watched = c.fetchall()
-    result = '\n\nList of Watched Movies:\n'
-    result += '-----------------------\n'
+    result = '\n\nList of Watched Movies:\n-----------------------\n'
     for movie in watched:
-        result += movie[0] + ' added by ' + movie[1] + '\n'
+        result += f'{movie[0]} added by {movie[1]}\n'
     print(result.rstrip())
     present_actions()
 
@@ -116,8 +115,7 @@ def view_watched():
 def view_club_members():
     c.execute(club_members)
     members = c.fetchall()
-    result = '\n\nList of Club Members:\n'
-    result += '---------------------\n'
+    result = '\n\nList of Club Members:\n---------------------\n'
     for member in members:
         result += member[0] + '\n'
     print(result.rstrip())
@@ -125,8 +123,7 @@ def view_club_members():
 
 
 def add_club_member():
-    name = input(
-        '\n\nEnter the name of a member to add (press enter to exit): ')
+    name = input('\nEnter the name of a member to add (press enter to exit): ')
     if name:
         c.execute('INSERT INTO Members VALUES (NULL, ?);', (name,))
         print(
@@ -143,10 +140,11 @@ def remove_club_member():
             '\nEnter the name of the club member you wish to remove (press enter to exit): ')
         if name:
             c.execute(member_ID_from_name, (name,))
-            member_ID = c.fetchone()[0]
-            if member_ID is None:
+            try:
+                member_ID = c.fetchone()[0]
+            except TypeError:
                 print(
-                    colored(f'Error: {name} is not the name of a current club member.', 'red'))
+                    colored(f'\nError: {name} is not the name of a current club member.', 'red'))
             else:
                 c.execute('DELETE FROM Movies WHERE picker_ID = ?;',
                           (member_ID,))
@@ -168,7 +166,7 @@ def member_list():
 
 
 def create_queue(name):
-    result = '\n\n' + name + "'s Queue:\n" + '-----------------------------\n'
+    result = f"\n\n{name}'s Queue:\n-----------------------------\n"
     c.execute(member_ID_from_name, (name,))
     member_id = c.fetchone()[0]
     c.execute(queue_sel, (member_id,))
@@ -183,9 +181,8 @@ def show_club_status():
     member_ID = c.fetchone()[0]
     c.execute('SELECT name FROM Members WHERE member_ID = ?;', (member_ID,))
     current_picker = c.fetchone()[0]
-    result = '\n\nThe person selecting the next movie is ' + current_picker
-    result += '.\n\nWould you like to override this?'
-    print(result)
+    print(
+        f'\n\nThe person selecting the next movie is {current_picker}.\n\nWould you like to override this?')
     answer = input('y/n: ')
     if answer == 'y':
         manual_update_the_picker()
@@ -203,8 +200,7 @@ def manual_update_the_picker():
     print(result)
     new_selector = input('Name: ')
     while new_selector not in names:
-        error = '\n' + new_selector + ' is not a member of the club.'
-        print(colored(error, 'red'))
+        print(colored(f'\n{new_selector} is not a member of the club.', 'red'))
         print(result)
         new_selector = input('Name: ')
     c.execute(member_ID_from_name, (new_selector,))
@@ -229,7 +225,7 @@ def update_the_picker():
 def goodbye():
     conn.commit()
     conn.close()
-    print('Goodbye!')
+    print(colored('\nGoodbye!\n', 'yellow'))
 
 
 action_dict = {1: view_movie_queues, 2: add_to_queue, 3: delete_from_queue, 4: view_watched, 5: add_to_watched,
@@ -248,7 +244,7 @@ def present_actions():
     menu = '\n\nSelect an Action:\n-----------------\n'
     n = 1
     for action in actions:
-        menu += str(n) + ' - ' + action + '\n\n\n'
+        menu += f'{n} - {action}\n\n'
         n += 1
     print(menu)
     try:
