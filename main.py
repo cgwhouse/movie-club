@@ -8,9 +8,9 @@ queue_sel = 'SELECT title FROM Movies WHERE picker_ID = ? AND watched = 0;'
 queue_ins = 'INSERT INTO Movies VALUES (NULL, ?, ?, 0);'
 queue_del = 'DELETE FROM Movies WHERE title = ?;'
 queue_watch = 'UPDATE Movies SET watched = 1 WHERE title = ?;'
-watched_list = 'SELECT title, name FROM Movies INNER JOIN Members ON picker_ID\
-                 = member_ID WHERE watched = 1;'
+watched_list = 'SELECT title, name FROM Movies INNER JOIN Members ON picker_ID = member_ID WHERE watched = 1;'
 club_members = 'SELECT name FROM Members;'
+member_ID_from_name = 'SELECT member_ID FROM Members WHERE name = ?;'
 conn = connect('movie_club.db')
 c = conn.cursor()
 
@@ -39,7 +39,7 @@ def add_to_queue():
         print(queue_prompt)
         selection = input()
     print('\nGreat! We will use ' + selection + "'s queue to add movies.")
-    c.execute('SELECT member_ID FROM Members WHERE name = ?;', (selection,))
+    c.execute(member_ID_from_name, (selection,))
     member_ID = c.fetchone()[0]
     movies_to_add = []
     movie_prompt = '\nEnter the name of a movie to add (press enter to exit):'
@@ -124,6 +124,40 @@ def view_club_members():
     present_actions()
 
 
+def add_club_member():
+    name = input(
+        '\n\nEnter the name of a member to add (press enter to exit): ')
+    if name:
+        c.execute('INSERT INTO Members VALUES (NULL, ?);', (name,))
+        print(
+            colored(f'\n{name} has been successfully added to the club. Welcome!', 'green'))
+        conn.commit()
+    present_actions()
+
+
+def remove_club_member():
+    print(colored("\nWARNING: Removing a club member will also wipe all of his/her data from the club's records (i.e. all queue and 'watched movie' data).", 'red'))
+    choice = input('\nAre you sure you want to proceed? (y/n): ')
+    if choice.lower() == 'y':
+        name = input(
+            '\nEnter the name of the club member you wish to remove (press enter to exit): ')
+        if name:
+            c.execute(member_ID_from_name, (name,))
+            member_ID = c.fetchone()[0]
+            if member_ID is None:
+                print(
+                    colored(f'Error: {name} is not the name of a current club member.', 'red'))
+            else:
+                c.execute('DELETE FROM Movies WHERE picker_ID = ?;',
+                          (member_ID,))
+                c.execute('DELETE FROM Members WHERE member_ID = ?;',
+                          (member_ID,))
+                conn.commit()
+                print(colored(
+                    f'\n{name} was successfully removed from the club. Good riddance.', 'green'))
+    present_actions()
+
+
 def member_list():
     c.execute('SELECT name FROM Members;')
     names = c.fetchall()
@@ -135,7 +169,7 @@ def member_list():
 
 def create_queue(name):
     result = '\n\n' + name + "'s Queue:\n" + '-----------------------------\n'
-    c.execute('SELECT member_ID FROM Members WHERE name = ?;', (name,))
+    c.execute(member_ID_from_name, (name,))
     member_id = c.fetchone()[0]
     c.execute(queue_sel, (member_id,))
     movies = c.fetchall()
@@ -173,7 +207,7 @@ def manual_update_the_picker():
         print(colored(error, 'red'))
         print(result)
         new_selector = input('Name: ')
-    c.execute('SELECT member_ID FROM Members WHERE name = ?;', (new_selector,))
+    c.execute(member_ID_from_name, (new_selector,))
     member_ID = c.fetchone()[0]
     c.execute('UPDATE ProgramInfo SET current_selector = ?;', (member_ID,))
     print(colored('\nThe current selector has been updated successfully.', 'green'))
@@ -198,10 +232,8 @@ def goodbye():
     print('Goodbye!')
 
 
-action_dict = {1: view_movie_queues, 2: add_to_queue, 3: delete_from_queue,
-               4: view_watched, 5: add_to_watched, 6: delete_from_watched,
-               7: view_club_members, 8: show_club_status,
-               9: goodbye}
+action_dict = {1: view_movie_queues, 2: add_to_queue, 3: delete_from_queue, 4: view_watched, 5: add_to_watched,
+               6: delete_from_watched, 7: view_club_members, 8: add_club_member, 9: remove_club_member, 10: show_club_status, 11: goodbye}
 
 
 def get_action(name):
@@ -210,9 +242,9 @@ def get_action(name):
 
 def present_actions():
     actions = ['View Movie Queues', 'Add to a Queue', 'Delete from a Queue',
-               'View Watched List', 'Add Movie to Watched List',
-               'Delete from Watched List', 'View Club Members',
-               'Whose Turn Is It?', 'Exit the Program']
+               'View Watched List', 'Add to Watched List',
+               'Delete from Watched List', 'View Club Members', 'Add a Club Member',
+               'Remove a Club Member', 'Whose Turn Is It?', 'Exit the Program']
     menu = '\n\nSelect an Action:\n-----------------\n'
     n = 1
     for action in actions:
